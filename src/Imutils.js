@@ -96,6 +96,37 @@ class Imutils
         return resized;
     }
 
+    static skeletonize(image, size, structuring=cv.MORPH_RECT)
+    {
+
+        image = image.bgrToGray();
+
+        const w = image.cols;
+        const h = image.rows;
+
+        const area = w * h;
+        // creates a matrix filled with 0
+        let skeleton = new cv.Mat(h, w, cv.CV_8U, 0);
+
+        const elem = cv.getStructuringElement(cv.MORPH_RECT, size);
+        
+        do
+        {
+            const eroded = image.erode(elem);
+
+            let temp = eroded.dilate(elem);
+            
+            temp = image.sub(temp);
+            
+            skeleton = skeleton.bitwiseOr(temp);
+            
+            image = eroded.copy();
+
+        }while(image.countNonZero() != area);
+
+        return skeleton;
+    }
+
 
 }
 

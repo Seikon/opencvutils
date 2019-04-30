@@ -1,8 +1,10 @@
 const Imutils = require("../Imutils");
+const ImAdvanced = require("../core");
 const cv = require("opencv4nodejs");
 
 const image = cv.imread("tortilla.jpg");
 // ----- Translation ----
+/*
 const imgDisplaced = Imutils.translate(image,
                                        // X = width / 2 
                                        image.cols / 2,
@@ -36,7 +38,7 @@ cv.imshow("rotated bound", imgRotationBound);
 console.log("Rotation bound performed, Check the results...!")
 cv.waitKey();
 cv.destroyAllWindows();
-*/
+
 
 // ----- Resize ----
 const imgResizeWidth = Imutils.resize(image, 542);
@@ -49,3 +51,29 @@ cv.imshow("Resized height", imgResizeHeight);
 console.log("Resizing performed , Check the results...!")
 cv.waitKey();
 cv.destroyAllWindows();
+
+
+const image2 = cv.imread("opencv.png");
+// ----- Skeletonize ----
+const imageSkeletonized = Imutils.skeletonize(image2, new cv.Size(2,2));
+cv.imshow("real", image2);
+// Result: -> The Image should be 2 times bigger in width
+cv.imshow("Skeletonized", imageSkeletonized);
+console.log("Resizing performed , Check the results...!")
+cv.waitKey();
+cv.destroyAllWindows();
+*/
+
+// ----- Image pyramid ----
+let ind = 0;
+
+for(let imgPyramid of ImAdvanced.pyramid(image, 1.5))
+{
+    cv.imshow("pyramid" + ind, imgPyramid);
+    ind ++;
+}
+// Result: -> A list of images appear, each one smaller than the previous one until the min size expecified
+console.log("Pyramid performed, Check the results...!")
+cv.waitKey();
+cv.destroyAllWindows();
+
