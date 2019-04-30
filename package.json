@@ -1,0 +1,14 @@
+{
+  "name": "opencvutils",
+  "version": "1.0.0",
+  "description": "advanced toolbox for opencv image processing techniques",
+  "main": "main.js",
+  "scripts": {
+    "test": "node test.js"
+  },
+  "author": "Seikon",
+  "license": "MIT",
+  "dependencies": {
+    "opencv4nodejs": "^4.14.1"
+  }
+}
