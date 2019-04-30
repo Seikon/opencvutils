@@ -25,7 +25,7 @@ cv.imshow("rotated", imgRotated);
 console.log("Rotation performed, Check the results...!")
 cv.waitKey();
 cv.destroyAllWindows();
-*/
+
 // ----- Rotation bound ----
 const imgRotationBound = Imutils.rotateBound(image, 90);
 
@@ -33,6 +33,19 @@ cv.imshow("real", image);
 // Result: -> The Image should be cropped or amplied when the image is rotated
 // for 90° width and height switch each other
 cv.imshow("rotated bound", imgRotationBound);
-console.log("Rotation performed, Check the results...!")
+console.log("Rotation bound performed, Check the results...!")
+cv.waitKey();
+cv.destroyAllWindows();
+*/
+
+// ----- Resize ----
+const imgResizeWidth = Imutils.resize(image, 542);
+const imgResizeHeight = Imutils.resize(image, null, 372);
+cv.imshow("real", image);
+// Result: -> The Image should be 2 times bigger in width
+cv.imshow("Resized width", imgResizeWidth);
+// Result: -> The Image should be 2 times bigger in height
+cv.imshow("Resized height", imgResizeHeight);
+console.log("Resizing performed , Check the results...!")
 cv.waitKey();
 cv.destroyAllWindows();

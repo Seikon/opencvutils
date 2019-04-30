@@ -51,6 +51,8 @@ class Imutils
         let nW = parseInt((h * sin) + (w * cos))
         let nH = parseInt((w * sin) + (h * cos))
 
+        //Force sin and cosin to be possitive no matter the direction of alpha, 
+        //only the magnitude
         nW = nW < 0 ? -nW : nW;
         nH = nH < 0 ? -nH : nH;
 
@@ -60,6 +62,41 @@ class Imutils
 
         return image.warpAffine(M, new cv.Size(nW, nH));
     }
+
+    static resize(image, width=null, height=null, inter=cv.INTER_AREA)
+    {
+        let dim = null;
+
+        const w = image.cols;
+        const h = image.rows;
+
+        //Return the same image when no width and height are provided
+        if(width == null && height == null)
+        {
+            return image;
+        }
+
+        if(width == null)
+        {
+            //Ratio based on height
+            const r = height / parseFloat(h);
+
+            dim = new cv.Size(parseInt(w * r), height);
+        }
+        else
+        {
+            //Ratio based on width
+            const r = width / parseFloat(w);
+
+            dim = new cv.Size(width, parseInt(h * r));
+        }
+
+        const resized = image.resize(dim,inter);
+
+        return resized;
+    }
+
+
 }
 
 module.exports = Imutils;
