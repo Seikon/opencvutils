@@ -20,6 +20,33 @@ class ImAdvanced
 
         yield image;
     }
+
+    static nonMaximaSupresion(boxes, overlapThresh)
+    {
+        if(boxes.length == 0)
+            return [];
+
+        
+    }
+
+    static *slidingWindow(image, stepSize, windowSize= new cv.Size(4,8))
+    {
+        // Slide a window across the height of the image
+        for(let y = 0; y < image.rows; y+= stepSize)
+        {
+            // Slide a window across the width of the image
+            for(let x = 0; x < image.cols; x+= stepSize)
+            {
+                //Continue when the region of the windows is bigger than the total amount of rows or colums 
+                if(x + windowSize.width > image.cols || y + windowSize.height > image.rows)
+                    continue;
+                
+                yield {x: x, y: y, window: image.getRegion(new cv.Rect(x, y, windowSize.width, windowSize.height))};
+            }
+
+            console.log("y: ", y);
+        }
+    }
 }
 
 module.exports = ImAdvanced;

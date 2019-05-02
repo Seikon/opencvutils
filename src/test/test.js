@@ -65,7 +65,7 @@ cv.destroyAllWindows();
 */
 
 // ----- Image pyramid ----
-let ind = 0;
+/*let ind = 0;
 
 for(let imgPyramid of ImAdvanced.pyramid(image, 1.5))
 {
@@ -76,4 +76,33 @@ for(let imgPyramid of ImAdvanced.pyramid(image, 1.5))
 console.log("Pyramid performed, Check the results...!")
 cv.waitKey();
 cv.destroyAllWindows();
+*/
+// ----- Image pyramid + sliding windows algorithym ----
+let winH = 100;
+let winW = 100;
+
+for(let imgPyramid of ImAdvanced.pyramid(image, 1.5))
+{
+    for(let windowResult of ImAdvanced.slidingWindow(imgPyramid, 32, new cv.Size(winW, winH)))
+    {
+        if(windowResult.window.cols != winW || windowResult.window.rows != winH)
+            continue;
+
+        const clone = imgPyramid.copy();
+
+        clone.drawRectangle(
+        new cv.Point(windowResult.x, windowResult.y), 
+        new cv.Point(windowResult.x + winW, windowResult.y + winH),
+        new cv.Vec(0,255,0),
+        2,
+        cv.LINE_8);
+
+        cv.imshow("Window", clone);
+        // This adjust the time beetwen images, doesn't not affect the perfom of the algorithim.
+        // Only for test porpouses and learn porpouses
+        cv.waitKey(50);
+    }
+}
+// Result: -> A green bound box move across the all the image pyramid 
+
 
