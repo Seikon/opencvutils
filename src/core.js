@@ -85,7 +85,7 @@ class ImAdvanced
         }
     }
 
-    static trainSVM(svm, hog, trainingDataPath, testDataPath, imageSize=new cv.Size(50,50))
+    static trainSVMWithHOG(svm, hog, trainingDataPath, imageSize=new cv.Size(50,50))
     {
         const classes = fs.readdirSync(trainingDataPath);
         let samples = [], labels = [];
@@ -124,6 +124,11 @@ class ImAdvanced
         svm.train(trainData);
 
         return {svm: svm, classes:classes};
+    }
+
+    static evaluateSVM(trainingDataPath, testDataPath)
+    {
+        
     }
 
     static fourPointsPerspective(image, pts)

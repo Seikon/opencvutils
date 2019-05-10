@@ -129,7 +129,7 @@ const svm = new cv.SVM({
 });
 
 // Traing the svm
-const trainingResult = ImAdvanced.trainSVM(svm, hog, "./tortillaDetector/traindata", "./tortillaDetector/testdata", new cv.Size(50,50));
+const trainingResult = ImAdvanced.trainSVMWithHOG(svm, hog, "./tortillaDetector/traindata", "./tortillaDetector/testdata", new cv.Size(50,50));
 const trainedSVM = trainingResult.svm;
 
 console.log(trainingResult.classes);
@@ -167,14 +167,3 @@ testFiles.forEach(file  => {
                     console.log(file + " : -> " + trainingResult.classes[predictLabel]);
 
 });
-*/
-
-//const orderedPoints = Imutils.orderPoints()
-
-console.log("Inicio");
-
-var test = [1,3,4,5,6];
-
-test.map(num => console.log(num));
-
-console.log("Final");
