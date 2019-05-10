@@ -96,6 +96,11 @@ class Imutils
         return resized;
     }
 
+    static resizeNoRatio(image, width, height, inter=cv.INTER_AREA)
+    {
+        return image.resize(new cv.Size(width,height), inter);
+    }
+
     static skeletonize(image, size, structuring=cv.MORPH_RECT)
     {
 
@@ -125,6 +130,68 @@ class Imutils
         }while(image.countNonZero() != area);
 
         return skeleton;
+    }
+
+    // Return order is [topLeft, topRight, bottomRight, bottomLeft]
+    static orderPoints(pts)
+    {
+        let rect = [0,0,0,0];
+        let minX = Number.MAX_VALUE, minY = Number.MAX_VALUE;
+        let maxX = Number.MIN_VALUE, maxY = Number.MIN_VALUE;
+        console.log(pts);
+        for(let pt of pts)
+        {
+            if(pt.x > maxX)
+                maxX = pt.x;
+
+            else if(pt.x < minX)
+                minX = pt.x;
+
+            if(pt.y > maxY)
+                maxY = pt.y
+
+            else if(pt.y < minY)
+                minY = pt.y;
+            
+        }
+
+        for(let pt of pts)
+        {
+            // Left
+            if(pt.x == minX)
+            {
+                // Top
+                if(pt.y == minY)
+                {
+                    // Top Left
+                    rect[0] = pt;
+                }
+                // Bottom
+                else
+                {
+                    // Bottom Left
+                    rect[3] = pt;
+                }
+            }
+            // Right
+            else
+            {
+                // Top
+                if(pt.y == minY)
+                {
+                    // Top Right
+                    rect[1] = pt;
+                }
+                // Bottom
+                else
+                {
+                    // Bottom Right
+                    rect[2] = pt;
+                }
+            }
+        }
+
+        return rect;
     }
 
 

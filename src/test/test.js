@@ -1,5 +1,6 @@
 const Imutils = require("../Imutils");
 const ImAdvanced = require("../core");
+const fs = require("fs");
 const cv = require("opencv4nodejs");
 
 const image = cv.imread("tortilla.jpg");
@@ -76,10 +77,10 @@ for(let imgPyramid of ImAdvanced.pyramid(image, 1.5))
 console.log("Pyramid performed, Check the results...!")
 cv.waitKey();
 cv.destroyAllWindows();
-*/
+*//*
 // ----- Image pyramid + sliding windows algorithym ----
-let winH = 100;
-let winW = 100;
+let winH = 50;
+let winW = 50;
 
 for(let imgPyramid of ImAdvanced.pyramid(image, 1.5))
 {
@@ -102,7 +103,78 @@ for(let imgPyramid of ImAdvanced.pyramid(image, 1.5))
         // Only for test porpouses and learn porpouses
         cv.waitKey(50);
     }
-}
+}/*
 // Result: -> A green bound box move across the all the image pyramid 
 
 
+// ----- Image pyramid + sliding windows algorithym ----
+let winH = 100;
+let winW = 100;
+
+const hog = new cv.HOGDescriptor({
+    winSize: new cv.Size(50, 50),
+    blockSize: new cv.Size(20, 20),
+    blockStride: new cv.Size(10, 10),
+    cellSize: new cv.Size(10, 10),
+    L2HysThreshold: 0.2,
+    nbins: 9,
+    gammaCorrection: true,
+    signedGradient: true
+  });
+
+const svm = new cv.SVM({
+    kernelType: cv.ml.SVM.RBF,
+    c: 12.5,
+    gamma: 0.50625
+});
+
+// Traing the svm
+const trainingResult = ImAdvanced.trainSVM(svm, hog, "./tortillaDetector/traindata", "./tortillaDetector/testdata", new cv.Size(50,50));
+const trainedSVM = trainingResult.svm;
+
+console.log(trainingResult.classes);
+
+const testFiles = fs.readdirSync("./tortillaDetector/testdata/tortilla");
+
+testFiles.forEach(file  => {
+                    //Load the image in memory,
+                    let image = cv.imread("./tortillaDetector/testdata/tortilla" + "/" + file);
+                    let resized;
+                    //Resize if it doesn't match with the Image Size for training
+                    if(image.cols != 50|| image.rows != 50)
+                    {
+                        resized = Imutils.resizeNoRatio(image, 50, 50);
+                    }
+                    // Transform to grayscale,
+                    const grayImage = resized.bgrToGray(); 
+                    // Compute the HOG descriptor
+                    const descriptor = hog.compute(grayImage);
+
+                    const predictLabel = trainedSVM.predict(descriptor);
+
+                    image.putText(trainingResult.classes[predictLabel], 
+                                  new cv.Point(image.cols / 4, image.rows - 10), 
+                                  cv.FONT_HERSHEY_PLAIN, 
+                                  2.5, 
+                                  new cv.Vec(0,255,0),
+                                  4,4);
+
+                    cv.imshow("Window", image);
+                    // This adjust the time beetwen images, doesn't not affect the perfom of the algorithim.
+                    // Only for test porpouses and learn porpouses
+                    cv.waitKey(1000);
+
+                    console.log(file + " : -> " + trainingResult.classes[predictLabel]);
+
+});
+*/
+
+//const orderedPoints = Imutils.orderPoints()
+
+console.log("Inicio");
+
+var test = [1,3,4,5,6];
+
+test.map(num => console.log(num));
+
+console.log("Final");
