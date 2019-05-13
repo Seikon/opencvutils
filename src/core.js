@@ -85,11 +85,10 @@ class ImAdvanced
         }
     }
 
-    static trainSVMWithHOG(svm, hog, trainingDataPath, imageSize=new cv.Size(50,50))
+    static trainSVMHOG(svm, hog, trainingDataPath, imageSize=new cv.Size(50,50))
     {
         const classes = fs.readdirSync(trainingDataPath);
         let samples = [], labels = [];
-        
         // For each class, look into directory for collect the training and test data
         for(let indClass = 0; indClass < classes.length; indClass++)
         {
@@ -126,9 +125,132 @@ class ImAdvanced
         return {svm: svm, classes:classes};
     }
 
-    static evaluateSVM(trainingDataPath, testDataPath)
+    static evaluateSVMHOG(svm, hog, trainingDataPath, testDataPath, imageSize=new cv.Size(50,50))
     {
-        
+        // Get the classes of the training and test data
+        const classes = fs.readdirSync(trainingDataPath);
+        const results = {};
+
+        // For each class, look into directory for collect the training and test data
+        for(let indClass = 0; indClass < classes.length; indClass++)
+        {
+            results[classes[indClass]] = {
+                trainingEvaluation : {
+                    error: 0,
+                    totalImages: 0,
+                    correct: 0,
+                    incorrect: 0,
+                },
+                testEvaluation : {
+                    error: 0,
+                    totalImages: 0,
+                    correct: 0,
+                    incorrect: 0,
+                }
+            };
+
+            // Evaluate the model error from training dataset
+            const traingFiles = fs.readdirSync(trainingDataPath + "/" + classes[indClass]);
+
+            for(let imageTrain of traingFiles)
+            {
+                //Load the image in memory,
+                let trainImage = cv.imread(trainingDataPath + "/" + classes[indClass] + "/" + imageTrain);
+
+                //Resize if it doesn't match with the Image Size for training
+                if(trainImage.cols != trainImage.width || trainImage.rows != trainImage.height)
+                {
+                    trainImage = Imutils.resizeNoRatio(trainImage,imageSize.width, imageSize.height);
+                }
+
+                // Transform to grayscale,
+                const grayTrainImage = trainImage.bgrToGray(); 
+                // Compute the HOG descriptor
+                const descriptor = hog.compute(grayTrainImage);
+
+                //Evaluate
+                const indLabel = svm.predict(descriptor);
+
+                if(classes[indLabel] == classes[indClass])
+                    results[classes[indClass]].trainingEvaluation.correct += 1;
+                else
+                    results[classes[indClass]].trainingEvaluation.incorrect += 1;
+
+                trainImage.release();
+                grayTrainImage.release();
+
+            }
+            // Fill the statistics with got data
+            results[classes[indClass]].trainingEvaluation.totalImages = traingFiles.length;
+            results[classes[indClass]].trainingEvaluation.error = (results[classes[indClass]].trainingEvaluation.incorrect / traingFiles.length) * 100;
+
+            // Evaluate the model error from test dataset
+            const testFiles = fs.readdirSync(testDataPath + "/" + classes[indClass]);
+
+            for(let imageTest of testFiles)
+            {
+                //Load the image in memory,
+                let testImage = cv.imread(testDataPath + "/" + classes[indClass] + "/" + imageTest);
+
+                //Resize if it doesn't match with the Image Size for training
+                if(testImage.cols != testImage.width || testImage.rows != testImage.height)
+                {
+                    testImage = Imutils.resizeNoRatio(testImage,imageSize.width, imageSize.height);
+                }
+
+                // Transform to grayscale,
+                const grayTestImage = testImage.bgrToGray(); 
+                // Compute the HOG descriptor
+                const descriptor = hog.compute(grayTestImage);
+                //Evaluate
+                const indLabel = svm.predict(descriptor);
+
+                if(classes[indLabel] == classes[indClass])
+                    results[classes[indClass]].testEvaluation.correct += 1;
+                else
+                    results[classes[indClass]].testEvaluation.incorrect += 1;
+
+                testImage.release();
+                grayTestImage.release();
+
+            }
+
+            // Fill the statistics with got data
+            results[classes[indClass]].testEvaluation.totalImages = testFiles.length;
+            results[classes[indClass]].testEvaluation.error = (results[classes[indClass]].testEvaluation.incorrect / testFiles.length) * 100;
+        }
+
+        return results;
+    }
+
+    static showEvaluationResults(results)
+    {
+        console.log("------ Evaluation results -----");
+        console.log("\n");
+
+        for(let label in results)
+        {
+            console.log("For class ", label);
+            console.log("------ 1 - Training -----");
+            console.log("- Total Images : ", results[label].trainingEvaluation.totalImages);
+            console.log("- Correct (OK) : ", results[label].trainingEvaluation.correct);
+            console.log("  % : ", (results[label].trainingEvaluation.correct / results[label].trainingEvaluation.totalImages) * 100);
+            console.log("- Incorrect (Error) : ", results[label].trainingEvaluation.incorrect);
+            console.log("  % : ", (results[label].trainingEvaluation.incorrect / results[label].trainingEvaluation.totalImages) * 100);
+            console.log("  Total Error (%) : ", results[label].trainingEvaluation.error);
+
+            console.log("------ 2 - Test -----");
+            console.log("- Total Images : ", results[label].testEvaluation.totalImages);
+            console.log("- Correct (OK) : ", results[label].testEvaluation.correct);
+            console.log("  % : ", (results[label].testEvaluation.correct / results[label].testEvaluation.totalImages) * 100);
+            console.log("- Incorrect (Error) : ", results[label].testEvaluation.incorrect);
+            console.log("  % : ", (results[label].testEvaluation.incorrect / results[label].testEvaluation.totalImages) * 100);
+            console.log("  Total Error (%) : ", results[label].testEvaluation.error);
+
+            console.log("\n");
+            console.log("\n");
+        }
+
     }
 
     static fourPointsPerspective(image, pts)

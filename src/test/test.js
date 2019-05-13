@@ -129,7 +129,7 @@ const svm = new cv.SVM({
 });
 
 // Traing the svm
-const trainingResult = ImAdvanced.trainSVMWithHOG(svm, hog, "./tortillaDetector/traindata", "./tortillaDetector/testdata", new cv.Size(50,50));
+const trainingResult = ImAdvanced.trainSVMHOG(svm, hog, "./tortillaDetector/traindata", "./tortillaDetector/testdata", new cv.Size(50,50));
 const trainedSVM = trainingResult.svm;
 
 console.log(trainingResult.classes);
