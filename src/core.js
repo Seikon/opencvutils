@@ -32,7 +32,7 @@ class ImAdvanced
         yield image;
     }
 
-    /*static nonMaximaSupresion(boxes = [], overlapThresh)
+    static nonMaximaSupresion(boxes = [], overlapThresh)
     {
         if(boxes.length == 0)
             return [];
@@ -44,28 +44,52 @@ class ImAdvanced
         const x1 = boxes.map(box => box.x);
         const y1 = boxes.map(box => box.y);
         const x2 = boxes.map(box => box.x + box.width);
-        const y2 = boxes.map(box => ReadableStreamBYOBReader.y + box.height);
+        let y2 = boxes.map((box,i) => {return {y:box.y + box.height, index: i}});
 
-        //Compute the area of the bounding boxes and sort the bounding
-        //boxes by the bottom-right y-coordinate of the bounding box
-        const area = boxes.map(box, i => x2[i] - x1[i] + 1) * (y2 - y1 + 1);
-        const idxs = y2.sort();
+        // Sort the idxs and return the y2 to its original form
+        let idxs = y2.sort((a,b) => a.y - b.y)
+                      .map(box => box.index);
+
+        y2 = y2.map(obj => obj.y);
+
+        // Compute the area of the bounding boxes and sort the bounding
+        // boxes by the bottom-right y-coordinate of the bounding box
+        const area = boxes.map((box, i) => (x2[i] - x1[i] + 1) * (y2[i] - y1[i] + 1));
 
         while(idxs.length > 0)
         {
             // Grab the last index
             const last = idxs.length - 1
-            const id = idxs[last];
+            const i = idxs[last];
 
-            pick.push(id);
+            pick.push(i);
 
-            //find the largest (x, y) coordinates for the start of
-            //the bounding box and the smallest (x, y) coordinates
-            //for the end of the bounding box
-            const xx1 = Math.max(x1[id], x1[idxs[]]);
+            let suppress = [last];
+
+            for(let ind = 0; ind <= last; ind++)
+            {
+                const j = idxs[ind];
+
+                const xx1 = Math.max(x1[i], x1[j]);
+                const yy1 = Math.max(y1[i], y1[j]);
+                const xx2 = Math.max(x2[i], x2[j]);
+                const yy2 = Math.max(y2[i], y2[j]);
+
+                const w = Math.max(0, xx2 - xx1 + 1);
+                const h = Math.max(0, yy2 - yy1 + 1);
+
+                const overlap = parseFloat(w * h) / area[j];
+
+                if(overlap > overlapThresh)
+                    suppress.push(ind);
+            }
+            // Get only the ids that are not present in supress list
+            idxs = idxs.filter(elem => !suppress.includes(elem));
         }
+
+        return boxes[pick];
         
-    }*/
+    }
 
     static *slidingWindow(image, stepSize, windowSize= new cv.Size(4,8))
     {
@@ -79,7 +103,8 @@ class ImAdvanced
                 if(x + windowSize.width > image.cols || y + windowSize.height > image.rows)
                     continue;
                 
-                yield {x: x, y: y, window: image.getRegion(new cv.Rect(x, y, windowSize.width, windowSize.height))};
+                yield {rect: new cv.Rect(x, y, windowSize.width, windowSize.height),
+                       window: image.getRegion(new cv.Rect(x, y, windowSize.width, windowSize.height))};
             }
 
         }
